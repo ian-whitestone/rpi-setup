@@ -3,6 +3,7 @@
 <img src='mmmmm-pie.jpg'>
 
 
+## Operating System
 1) I had an SD card pre-installed with NOOBS, so just plugged it in to power, a monitor and a keyboard, and was prompted to select my OS: `Raspbian [RECOMMENDED]`
 
 - If you don't have an SD card with NOOBS, follow instructions [here](https://thepi.io/how-to-install-noobs-on-the-raspberry-pi/)
@@ -12,11 +13,12 @@
 - Reset password
 - Wifi setup
 
-3) Enable SSH
+### SSH Tings
+1) Enable SSH
 - Instructions [here](https://www.raspberrypi.org/documentation/remote-access/ssh/)
 - Get hostname by running `ifconfig`
 
-4) SSH in..
+2) SSH in..
 
 ```
 → ssh pi@192.168.0.22
@@ -40,22 +42,30 @@ pi@raspberrypi:~ $ logout
 Connection to 192.168.0.22 closed.
 ```
 
-5) Renaming your PI
+3) Renaming your PI
+
+This is so I know which raspberry pi is which when I'm looking at connected devices on my router
 
 `$ sudo vi /etc/hostname`
 
-6) Enable passwordless SSH
+Whatever you change your hostname to, you need to add it to `/etc/hosts`.
+For example, if you changed your hostname to `mypi`, add the following:
+
+`127.0.0.1       mypi`
+
+to the end of `/etc/hosts`
+
+4) Enable passwordless SSH
 
 - Instructions [here](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
 
-7) Enable Camera
+TLDR:
 
-1) `$ sudo raspi-config`
-2) Interfacing Options
-3) Camera --> Yes
+- If you already have a `~/.ssh/id_rsa.pub`, just do:
 
+`cat ~/.ssh/id_rsa.pub | ssh pi@192.168.0.22 'mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys'`
 
-8) Static IP Address
+5) Static IP Address
 
 Followed instructions [here](https://www.modmypi.com/blog/how-to-give-your-raspberry-pi-a-static-ip-address-update), and added the following to the end of my `/etc/dhcpcd.conf` file:
 
@@ -73,12 +83,57 @@ static routers=192.168.0.1
 static domain_name_servers=192.168.0.1
 ```
 
-9) Adding some SSH shortcuts
+6) Adding some SSH shortcuts
 - Remember hostnames is annoying, so adding some ssh shortcuts to my personal macbook
 
 
+`$ vi ~/.ssh/config`
 
-10) Get oh-my-zsh
+```
+Host pi1
+    HostName 192.168.0.17
+    User pi
+
+Host pi2
+    HostName 192.168.0.22
+    User pi
+```
+
+### Camera Tings
+
+1) Enable Camera
+
+- `$ sudo raspi-config`
+- Interfacing Options
+- Camera --> Yes
+
+2) OpenCV
+
+3) Install some pythong packages
+
+```
+pip install picamera
+pip install smbus2
+```
+
+4) pantilthat
+
+- Enable I2C bus: 
+
+    - `sudo raspi-config`
+    - Interface Options
+    - I2C
+
+- Install drivers/packages: https://github.com/pimoroni/pantilt-hat
+
+```bash
+sudo apt-get install pimoroni
+pip3 install pantilthat
+```
+
+### Other Tings
+
+1) Get oh-my-zsh
 
 [Instructions](https://escapologybb.com/oh-my-zsh/)
 
@@ -86,10 +141,87 @@ static domain_name_servers=192.168.0.1
 sudo apt-get update && sudo apt-get upgrade 
 sudo apt-get install git zsh
 chsh -s /bin/zsh
+
+# Get oh-my-zsh
 sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 ```
 
 
-X) Install miniconda
+### Conda
 
-`$ wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh`
+Install miniconda
+
+```bash
+wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-armv7l.sh
+sudo md5sum Miniconda3-latest-Linux-armv7l.sh
+sudo /bin/bash Miniconda3-latest-Linux-armv7l.sh
+
+# when prompted, change install path to /home/pi/miniconda3
+```
+
+Add the following to your `~/.bashrc` or `~/.zshrc`:
+
+`export PATH=/home/pi/miniconda3/bin:$PATH`
+
+Resource your profile:
+
+`source ~/.zshrc`
+
+And check your python path:
+
+```bash
+>>> which python
+/home/pi/miniconda3/bin/python
+```
+
+Now install the anaconda-client so you can create conda environments:
+
+```
+sudo chown -R pi miniconda3
+conda install anaconda-client
+```
+
+Create new environment:
+
+`conda create -n test python=3 -y`
+
+And activate it:
+
+`source activate test`
+
+
+Check which pip is the default:
+
+`which pip`
+
+If its not `/home/pi/miniconda3/bin/pip`, run a `conda install pip`, resource profile, and make sure `which pip` is now point to correct one.
+
+`pip install --upgrade pip`
+
+
+### Python 3
+
+Conda python doesnt work as well on an RPI, particularly when trying to get the `pantilthat` library with I2C and smbus working.
+Installing python 3 from source.
+
+
+```
+sudo apt-get install python3-dev libffi-dev libssl-dev -y
+wget https://www.python.org/ftp/python/3.6.3/Python-3.6.3.tar.xz
+tar xJf Python-3.6.3.tar.xz
+cd Python-3.6.3
+./configure
+make
+sudo make install
+sudo pip3 install --upgrade pip
+```
+
+
+### Security and System Monitoring
+
+#### fail2ban
+Coming soon...
+
+#### Glances
+
+Coming soon...
