@@ -109,12 +109,72 @@ Host pi2
 
 2) OpenCV
 
-3) Install some pythong packages
+```
+sudo pip3 install numpy
+
+sudo apt install cmake gcc g++ git libjpeg-dev libpng-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev pkg-config libgtk2.0-dev libopenblas-dev libatlas-base-dev liblapack-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavcodec-dev libavutil-dev libavfilter-dev libavformat-dev libavresample-dev ffmpeg
+
+wget https://github.com/opencv/opencv/archive/3.4.3.zip
+unzip 3.4.3
+cd opencv-3.4.3
+
+mkdir release
+cd release
+
+cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=ON -DWITH_OPENCL=ON -DWITH_IPP=ON -DWITH_TBB=ON -DWITH_EIGEN=ON -DWITH_V4L=ON -DWITH_VTK=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+
+
+make -j -l 2
+sudo make install
+```
+
+Testing:
+
+- requires picamera, installed below
+
+```python
+import picamera
+import cv2
+from picamera.array import PiRGBArray
+import numpy as np
+import time
+
+
+with picamera.PiCamera() as camera:
+    camera.resolution = (640, 480)
+    camera.framerate = 32
+    print('Warming up camera')
+    time.sleep(2)
+
+    raw_capture = PiRGBArray(camera, size=(640, 480))
+    i = 0
+    for f in camera.capture_continuous(raw_capture, 'bgr',
+                                       use_video_port=True):
+        print (i)
+        frame = f.array
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        cv2.imwrite('{}.png'.format(i), gray)
+
+        # clear the stream in preparation for the next frame
+        raw_capture.truncate(0)
+        i += 1
+        if i > 5:
+            break
+```
+
+
+3) Install some python packages
 
 ```
-pip install picamera
-pip install smbus2
+sudo pip install picamera
+sudo pip install git+https://github.com/ian-whitestone/pantilt-hat.git
 ```
+
+Check that the camera is working:
+
+`python3 -c "from picamera import PiCamera; import time; camera = PiCamera(); time.sleep(3); camera.capture('/home/pi/image.jpg')"`
+`scp pi1:image.jpg .`
 
 4) pantilthat
 
@@ -129,6 +189,24 @@ pip install smbus2
 ```bash
 sudo apt-get install pimoroni
 pip3 install pantilthat
+```
+
+Testing:
+
+```
+➜  ~ python
+Python 3.6.3 (default, Oct 13 2018, 14:52:29)
+[GCC 6.3.0 20170516] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pantilthat
+>>> import pantilthat as pt
+>>> pt.get_pan()
+30
+>>> pt.get_tilt()
+30
+>>> pt.tilt(0)
+>>> pt.pan(0)
+>>>
 ```
 
 ### Other Tings
@@ -146,6 +224,28 @@ chsh -s /bin/zsh
 sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 ```
 
+2) Get arrow keys working in python interpreter
+[Source](https://askubuntu.com/questions/958998/arrow-keys-not-working-in-python-interpreter)
+
+- `sudo pip install readline`
+- `sudo apt install libreadline-dev`
+
+3) GPIO Testing
+
+`sudo pip3 install RPi.GPIO`
+
+```python
+import time
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(21, GPIO.IN)
+
+
+while True:
+    print (GPIO.input(21))
+    time.sleep(0.1)
+```
 
 ### Conda
 
@@ -216,6 +316,21 @@ sudo make install
 sudo pip3 install --upgrade pip
 ```
 
+Testing out:
+
+```
+>>> which python3
+/usr/local/bin/python3
+>>> python3 --version
+Python 3.6.3
+```
+
+Add some aliases to `~/.zshrc`:
+
+```
+alias python=python3
+alias pip=pip3
+```
 
 ### Security and System Monitoring
 
