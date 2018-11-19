@@ -101,6 +101,8 @@ Host pi2
 
 ### Camera Tings
 
+**IMPORTANT:** See python 3 section below for instructions on how to get python 3 installed, and alias `python` to use `python3`.
+
 1) Enable Camera
 
 - `$ sudo raspi-config`
@@ -127,6 +129,8 @@ cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=ON -
 make -j -l 2
 sudo make install
 ```
+
+**NOTE:** If you have any issues running the `make` command, you may need to fiddle with the parameters. See #2 for a user who had this issue.
 
 Testing:
 
@@ -249,6 +253,9 @@ while True:
 
 ### Conda
 
+
+**IMPORTANT:** I had some issues with conda, particularly when trying to get it to work with the pantilt library, so ended up not using it and installing python 3 from source, see section below for info on how to do that.
+
 Install miniconda
 
 ```bash
@@ -339,4 +346,4 @@ Coming soon...
 
 #### Glances
 
-Coming soon...
+See writeup [here](https://github.com/ian-whitestone/rpi-security-system/blob/master/setup.md#glances)
