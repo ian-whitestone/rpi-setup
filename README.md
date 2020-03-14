@@ -109,6 +109,7 @@ Host pi2
 
 2) OpenCV
 
+
 ```
 sudo pip3 install numpy
 
@@ -163,6 +164,8 @@ with picamera.PiCamera() as camera:
             break
 ```
 
+- [Reference](https://www.scivision.co/anaconda-python-opencv3/)
+- If the above doesnt work, try the [more detailed guide by Adrian Rosebrock](https://www.pyimagesearch.com/2017/09/04/raspbian-stretch-install-opencv-3-python-on-your-raspberry-pi/)
 
 3) Install some python packages
 
@@ -246,6 +249,10 @@ while True:
     print (GPIO.input(21))
     time.sleep(0.1)
 ```
+
+4) Install Screen
+
+`sudo apt-get install screen`
 
 ### Conda
 
@@ -332,6 +339,16 @@ alias python=python3
 alias pip=pip3
 ```
 
+### Redis
+
+Followed instructions from this [blog post](http://mjavery.blogspot.com/2016/05/setting-up-redis-on-raspberry-pi.html).
+
+**Note:**
+this line: `sudo cp utils/redis_init_script /etc/init.d/redis_6379`
+should be: `sudo cp utils/redis_init_script /etc/init.d/redis`
+
+As pointed out by someone in the comments.
+
 ### Security and System Monitoring
 
 #### fail2ban
@@ -339,4 +356,15 @@ Coming soon...
 
 #### Glances
 
-Coming soon...
+See [docs](https://glances.readthedocs.io/en/latest/install.html)
+
+`pip install glances[action,browser,cpuinfo,chart,web,wifi]`
+
+**Note:** if you are running this in a zsh shell, you need to escape the square brackets.
+
+`pip install glances\[action,browser,cpuinfo,chart,web,wifi\]`
+
+
+Kick it off:
+
+`glances -w`
