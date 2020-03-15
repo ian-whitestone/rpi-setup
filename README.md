@@ -375,3 +375,74 @@ See [docs](https://glances.readthedocs.io/en/latest/install.html)
 Kick it off:
 
 `glances -w`
+
+
+# Fresh Setup with Ubuntu
+
+## Flashing OS Image to SD Card
+
+1. Downloaded Raspberry Pi Imager from [here](https://www.raspberrypi.org/documentation/installation/sdxc_formatting.md)
+2. Formatted SD with Ubuntu 18.04.4 (Pi 2/3/4) 32 bit
+
+<img src='rpi-imager.png'>
+
+## First Login
+
+* Hook up raspberry pi to power source, monitor via HDMI cable and internet via an ethernet cable
+* You will see a terminal pop up on the screen
+* Login with `ubuntu` for both the username and password, then follow the prompts to change the password
+
+## Setting up and installing everything
+
+### Connect to wireless internet
+
+Tried installing this:
+
+`sudo apt install -y wireless-tools`
+
+But got an error like `Could not get lock /var/lib/apt/lists/lock – open (11: Resource temporarily unavailable`..as per [here](https://itsfoss.com/could-not-get-lock-error/), you can run:
+
+`sudo lsof /var/lib/dpkg/lock-frontend`
+
+In my case I had some security upgrades running, so just waited until that process finished.
+
+Next, I followed the instructions from [this guide](https://www.linuxbabe.com/ubuntu/connect-to-wi-fi-from-terminal-on-ubuntu-18-04-19-04-with-wpa-supplicant). Found it a bit tricky and had to go back and forth with the instructions a bit...I also had to use `wlan0` instead of `wlp4s0`.
+
+I also had to remove the `ExecStop` line from the suggested contents of `/etc/systemd/system/dhclient.service`. Not sure why this was there..it appears to release the IP address.
+
+```bash
+[Unit]
+Description= DHCP Client
+Before=network.target
+After=wpa_supplicant.service
+
+[Service]
+Type=simple
+ExecStart=/sbin/dhclient wlan0 -v
+ExecStop=/sbin/dhclient wlan0 -r # Removed this line
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+Ran `curl https://ianwhitestone.work` to validate the connect.
+
+I then did a `sudo reboot`, logged back in, and re-ran that test to make sure I am connected to the wifi by default.
+
+### ssh setup
+
+```
+sudo apt update
+sudo apt install openssh-server # it was already installed for me...
+```
+
+Ran `ip a | grep 91` to grab my assigned IP address.
+
+Renamed host, as per instructions [above](#ssh-tings)
+
+### Python Setup
+
+TODO: figure out how to safely upgrade Python without borking the system python...
+
+* http://milq.github.io/install-python-scientific-computing-ubuntu-debian/
+* https://tech.serhatteker.com/post/2019-12/how-to-install-python38-on-ubuntu/
